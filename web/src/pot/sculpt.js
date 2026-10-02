@@ -1,10 +1,12 @@
 import * as THREE from 'three/webgpu';
 import { Inspector } from 'three/addons/inspector/Inspector.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 import { Sculptor } from 'three/addons/misc/Sculptor.js';
-import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
-import { createNoise3D } from 'simplex-noise';
+
+import { createBlobGeometry } from './blob.js';
+import { createThrottle } from './throttle.js';
+import { pickSfxVariation } from './sfxVariation.js';
+import { getCursorState } from './cursorState.js';
 
 let renderer, scene, camera, controls, sculptor, mesh;
 let cursorGroup, cursorRing, cursorDot, cursorMaterial;
@@ -23,10 +25,13 @@ const link = document.createElement( 'a' );
 link.style.display = 'none';
 document.body.appendChild( link );
 
+// Áudio
+
+const SFX_INTERVAL_MS = 150; // intervalo mínimo entre sons durante o arraste
+
 const audioCtx = new AudioContext();
 const clayBuffers = [];
-let lastSfxTime = 0;
-const SFX_INTERVAL = 150; // ms entre sons durante o arraste
+const sfxThrottle = createThrottle( SFX_INTERVAL_MS );
 
 async function loadClaySfx( urls ) {
 
@@ -43,17 +48,16 @@ async function loadClaySfx( urls ) {
 function playClay( volume = 0.4, force = false ) {
 
 	if ( clayBuffers.length === 0 ) return;
+	if ( sfxThrottle.tryFire( { force } ) === false ) return;
 
-	const now = performance.now();
-	if ( force === false && now - lastSfxTime < SFX_INTERVAL ) return;
-	lastSfxTime = now;
+	const { buffer, playbackRate, gainFactor } = pickSfxVariation( clayBuffers );
 
 	const source = audioCtx.createBufferSource();
-	source.buffer = clayBuffers[ Math.floor( Math.random() * clayBuffers.length ) ];
-	source.playbackRate.value = 0.9 + Math.random() * 0.2;
+	source.buffer = buffer;
+	source.playbackRate.value = playbackRate;
 
 	const gain = audioCtx.createGain();
-	gain.gain.value = volume * ( 0.8 + Math.random() * 0.4 );
+	gain.gain.value = volume * gainFactor;
 
 	source.connect( gain ).connect( audioCtx.destination );
 	source.start();
@@ -125,7 +129,8 @@ init();
 function init() {
 
 	// Renderer
-	const canvas = document.getElementById('sculpt');
+
+	const canvas = document.getElementById( 'sculpt' );
 	renderer = new THREE.WebGPURenderer( { canvas, antialias: true } );
 	renderer.setPixelRatio( window.devicePixelRatio );
 	renderer.setSize( window.innerWidth, window.innerHeight );
@@ -155,32 +160,16 @@ function init() {
 	scene.add( dirLight2 );
 
 	// Mesh
-	const noise3D = createNoise3D();
-	let geometry = new THREE.IcosahedronGeometry( 1, 75 );
-	geometry.deleteAttribute('normal');
-	geometry.deleteAttribute('uv');
-	geometry = mergeVertices(geometry)
 
 	const material = new THREE.MeshPhysicalMaterial( {
-	color: 0x8a5a44,
-	roughness: 0.75,
-	metalness: 0,
-	clearcoat: 0.3,
-	clearcoatRoughness: 0.45,
+		color: 0x8a5a44,
+		roughness: 0.75,
+		metalness: 0,
+		clearcoat: 0.3,
+		clearcoatRoughness: 0.45,
 	} );
 
-	const position = geometry.attributes.position;
-	const vector = new THREE.Vector3();
-	for (let i = 0; i < position.count; i++) {
-		vector.fromBufferAttribute(position, i);
-		const noise = noise3D(vector.x * 1, vector.y * 1, vector.z * 1);
-		vector.multiplyScalar(1 + noise * 0.15);
-		vector.y *= 0.8;
-		if (vector.y < -0.6) vector.y = -0.6;
-		position.setXYZ(i, vector.x, vector.y, vector.z);
-	}
-	geometry.computeVertexNormals();
-	mesh = new THREE.Mesh( geometry, material );
+	mesh = new THREE.Mesh( createBlobGeometry(), material );
 	scene.add( mesh );
 
 	// Sculptor
@@ -194,13 +183,15 @@ function init() {
 		controls.enabled = false;
 
 		audioCtx.resume();
-		playClay( 0.5, true);
+		playClay( 0.5, true );
 
 	} );
 
 	sculptor.addEventListener( 'change', function () {
+
 		if ( sculptor.isSculpting() ) playClay( 0.3 );
-	})
+
+	} );
 
 	sculptor.addEventListener( 'end', function () {
 
@@ -411,8 +402,9 @@ function init() {
 
 		}
 
-		cursorMaterial.color.setHex( hasHit && isHovering ? 0xcc0000 : 0xcc6600 );
-		cursorRing.visible = isHovering;
+		const cursorState = getCursorState( { hasHit, isHovering } );
+		cursorMaterial.color.setHex( cursorState.color );
+		cursorRing.visible = cursorState.ringVisible;
 		cursorDot.visible = true;
 		cursorGroup.visible = true;
 
