@@ -1,0 +1,19 @@
+{
+  "name": "tailwater",
+  "version": "1.0.0",
+  "description": "A riverside grounding ritual with two cats. Real-time Three.js experience powered by a Python pipeline for color grading, procedural terrain, and audio mastering. Nothing you write ever leaves your browser.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "simplex-noise": "^4.0.3",
+    "three": "^0.186.1"
+  }
+}

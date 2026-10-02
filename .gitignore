@@ -1,0 +1,30 @@
+# macOS
+.DS_Store
+
+# Node (sem barra no início: ignora em qualquer pasta, inclusive web/node_modules)
+node_modules/
+
+# Build do Vite
+dist/
+
+# Relatório de cobertura do Vitest
+coverage/
+
+# Variáveis de ambiente: nunca commitar segredo
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+
+# Python (pipeline de assets)
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# Editores
+.vscode/
+.idea/
