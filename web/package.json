@@ -7,13 +7,18 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "vitest"
+    "test": "vitest run",
+	"test:watch": "vitest"
   },
   "devDependencies": {
     "vite": "^8.3.0",
     "vitest": "^5.0.3"
   },
   "dependencies": {
-    "simplex-noise": "^4.0.3"
+    "simplex-noise": "^4.0.3",
+    "three": "^0.186.1"
+  },
+  "allowScripts": {
+    "fsevents@2.3.3": true
   }
 }

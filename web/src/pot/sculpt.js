@@ -2,7 +2,6 @@ import * as THREE from 'three/webgpu';
 import { Inspector } from 'three/addons/inspector/Inspector.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { Sculptor } from 'three/addons/misc/Sculptor.js';
-
 import { createBlobGeometry } from './blob.js';
 import { createThrottle } from './throttle.js';
 import { pickSfxVariation } from './sfxVariation.js';
@@ -65,9 +64,7 @@ function playClay( volume = 0.4, force = false ) {
 }
 
 loadClaySfx( [
-	'/sfx/clay1.m4a',
-	'/sfx/clay2.m4a',
-	'/sfx/clay3.m4a',
+	import.meta.env.BASE_URL + 'sfx/clay1.m4a',
 ] );
 
 export function onSculptFinished( callback ) {
