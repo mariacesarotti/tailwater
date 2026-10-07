@@ -28,3 +28,6 @@ __pycache__/
 # Editores
 .vscode/
 .idea/
+
+# Experimentos locais do atelier
+atelier/scratch/sources/audio/

@@ -1,0 +1,70 @@
+{
+  "assets": [
+    {
+      "files": {
+        "m4a": "audio/ambience-earlymorning.ed98fe3003.m4a",
+        "ogg": "audio/ambience-earlymorning.e07e4713e5.ogg"
+      },
+      "id": "ambience-earlymorning",
+      "kind": "audio",
+      "meta": {
+        "duration_s": 262.904,
+        "loop": true,
+        "loudness_lufs": -30.0,
+        "peak_db": -8.42,
+        "role": "ambience"
+      },
+      "stage": "audio"
+    },
+    {
+      "files": {
+        "m4a": "audio/clay1.72d4dd3b64.m4a",
+        "ogg": "audio/clay1.63cfaca93c.ogg"
+      },
+      "id": "clay1",
+      "kind": "audio",
+      "meta": {
+        "duration_s": 0.565,
+        "loop": false,
+        "loudness_lufs": -23.0,
+        "peak_db": -6.23,
+        "role": "sfx"
+      },
+      "stage": "audio"
+    },
+    {
+      "files": {
+        "m4a": "audio/clay2.5ca9e509ad.m4a",
+        "ogg": "audio/clay2.007e8af557.ogg"
+      },
+      "id": "clay2",
+      "kind": "audio",
+      "meta": {
+        "duration_s": 0.78,
+        "loop": false,
+        "loudness_lufs": -23.0,
+        "peak_db": -6.68,
+        "role": "sfx"
+      },
+      "stage": "audio"
+    },
+    {
+      "files": {
+        "m4a": "audio/clay3.68793e7e4e.m4a",
+        "ogg": "audio/clay3.1d2541cd75.ogg"
+      },
+      "id": "clay3",
+      "kind": "audio",
+      "meta": {
+        "duration_s": 0.909,
+        "loop": false,
+        "loudness_lufs": -23.0,
+        "peak_db": -4.82,
+        "role": "sfx"
+      },
+      "stage": "audio"
+    }
+  ],
+  "atelier_version": "0.1.0",
+  "schema_version": 1
+}

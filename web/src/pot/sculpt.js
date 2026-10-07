@@ -3,8 +3,7 @@ import { Inspector } from 'three/addons/inspector/Inspector.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { Sculptor } from 'three/addons/misc/Sculptor.js';
 import { createBlobGeometry } from './blob.js';
-import { createThrottle } from './throttle.js';
-import { pickSfxVariation } from './sfxVariation.js';
+import { initAudio, unlockAudio, playClay } from '../audio/audio.js';
 import { getCursorState } from './cursorState.js';
 
 let renderer, scene, camera, controls, sculptor, mesh;
@@ -24,48 +23,11 @@ const link = document.createElement( 'a' );
 link.style.display = 'none';
 document.body.appendChild( link );
 
-// Áudio
+// Áudio: ambiência em loop e sfx do clay vêm do manifest (ver ../audio/audio.js).
+// O som só começa depois do primeiro gesto da usuária (política de autoplay dos navegadores).
 
-const SFX_INTERVAL_MS = 150; // intervalo mínimo entre sons durante o arraste
-
-const audioCtx = new AudioContext();
-const clayBuffers = [];
-const sfxThrottle = createThrottle( SFX_INTERVAL_MS );
-
-async function loadClaySfx( urls ) {
-
-	for ( const url of urls ) {
-
-		const response = await fetch( url );
-		const data = await response.arrayBuffer();
-		clayBuffers.push( await audioCtx.decodeAudioData( data ) );
-
-	}
-
-}
-
-function playClay( volume = 0.4, force = false ) {
-
-	if ( clayBuffers.length === 0 ) return;
-	if ( sfxThrottle.tryFire( { force } ) === false ) return;
-
-	const { buffer, playbackRate, gainFactor } = pickSfxVariation( clayBuffers );
-
-	const source = audioCtx.createBufferSource();
-	source.buffer = buffer;
-	source.playbackRate.value = playbackRate;
-
-	const gain = audioCtx.createGain();
-	gain.gain.value = volume * gainFactor;
-
-	source.connect( gain ).connect( audioCtx.destination );
-	source.start();
-
-}
-
-loadClaySfx( [
-	import.meta.env.BASE_URL + 'sfx/clay1.m4a',
-] );
+initAudio().catch( ( error ) => console.warn( '[audio]', error.message ) );
+window.addEventListener( 'pointerdown', unlockAudio, { once: true } );
 
 export function onSculptFinished( callback ) {
 
@@ -179,7 +141,7 @@ function init() {
 		releasedPointerId = null;
 		controls.enabled = false;
 
-		audioCtx.resume();
+		unlockAudio();
 		playClay( 0.5, true );
 
 	} );

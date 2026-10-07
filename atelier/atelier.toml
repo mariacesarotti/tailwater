@@ -1,0 +1,65 @@
+# Decisões do atelier, como dados. Mudar o som é editar este arquivo, não o código.
+#
+# O sufixo de cada chave diz a unidade: _db decibéis, _lufs loudness integrado,
+# _ms milissegundos. Caminhos são relativos a ESTE arquivo, não à pasta onde
+# você roda o comando.
+
+[paths]
+sources = "../sources/audio"
+output = "../web/public/assets/generated"
+
+[audio]
+sample_rate = 48000        # Hz, taxa de saída
+peak_ceiling_db = -1.0     # nenhum arquivo final passa daqui
+
+[audio.trim]
+threshold_db = -60.0       # abaixo disso conta como silêncio
+margin_ms = 20.0           # folga mantida em volta do som, para não cortar ataque e cauda
+
+[audio.sfx]
+target_lufs = -23.0
+apply_trim = true
+
+[audio.ambience]
+target_lufs = -30.0        # mais baixa que os sfx de propósito; igual para todos os momentos do dia
+apply_trim = false
+crossfade_ms = 2000.0
+
+# ---- sfx ----
+[[audio.assets]]
+id = "clay1"
+source = "clay/clay1.wav"
+kind = "sfx"
+
+[[audio.assets]]
+id = "clay2"
+source = "clay/clay2.wav"
+kind = "sfx"
+
+[[audio.assets]]
+id = "clay3"
+source = "clay/clay3.wav"
+kind = "sfx"
+
+# ---- ambiência: um asset por momento do dia ----
+# Por enquanto só a manhã. O id é o que o manifest (e depois os presets de horário)
+# vão referenciar. Para liberar outro momento, descomente o bloco e confira o nome do arquivo.
+[[audio.assets]]
+id = "ambience-earlymorning"
+source = "ambience/earlymorning/656124__itsthegoodstuff__nature-ambiance.wav"   # TROQUE pelo nome real do arquivo da pasta
+kind = "ambience"
+
+# [[audio.assets]]
+# id = "ambience-day"
+# source = "ambience/day/517042__sonidosreales245__forestday_bw66.wav"
+# kind = "ambience"
+#
+# [[audio.assets]]
+# id = "ambience-evening"
+# source = "ambience/evening/ARQUIVO.wav"
+# kind = "ambience"
+#
+# [[audio.assets]]
+# id = "ambience-night"
+# source = "ambience/night/ARQUIVO.wav"
+# kind = "ambience"

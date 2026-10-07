@@ -1,40 +1,35 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "atelier"
 version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
-authors = [
-    { name = "Maria Cesarotti", email = "mariacesarotti@gmail.com" }
-]
-requires-python = ">=3.14"
+requires-python = ">=3.12"
 dependencies = [
-    "numpy>=2.5.3",
-    "pydantic>=2.13.5",
-    "pyloudnorm>=0.2.0",
-    "soundfile>=0.14.0",
-    "typer>=0.27.2",
+    "numpy",
+    "pydantic",
+    "soundfile",
+    "pyloudnorm",
+    "typer",
 ]
 
 [project.scripts]
 atelier = "atelier.cli:app"
 
-[build-system]
-requires = ["uv_build>=0.12.22,<0.13.0"]
-build-backend = "uv_build"
-
 [dependency-groups]
-dev = [
-    "hypothesis>=6.168.3",
-    "mypy>=2.4.0",
-    "pytest>=9.1.1",
-    "ruff>=0.16.10",
-]
+dev = ["pytest", "mypy", "ruff"]
 
-[tool.uv.workspace]
-members = [
-    "src/atelier/audio",
-    "audio",
-]
+[tool.hatch.build.targets.wheel]
+packages = ["src/atelier"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
 
 [tool.mypy]
 strict = true
+mypy_path = "src"
+
+[[tool.mypy.overrides]]
+module = ["soundfile", "pyloudnorm"]
+ignore_missing_imports = true

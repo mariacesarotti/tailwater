@@ -1,5 +1,3 @@
-// Faixas de variação: cada som sai levemente diferente,
-// pra repetição durante o arraste não soar mecânica.
 const PLAYBACK_RATE_MIN = 0.9;
 const PLAYBACK_RATE_SPREAD = 0.2;   // 0.9 até 1.1
 
