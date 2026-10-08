@@ -7,7 +7,7 @@ from atelier.hashing import canonical_json, hash_bytes, hash_file, hash_json
 
 
 def test_hash_file_matches_hashlib_across_chunk_boundary(tmp_path: Path) -> None:
-    data = bytes(range(256)) * 10_000 + b"fim"  # ~2,5 MB: passa de um pedaço de 1 MiB
+    data = bytes(range(256)) * 10_000 + b"fim"
     path = tmp_path / "big.bin"
     path.write_bytes(data)
     assert hash_file(path) == hashlib.sha256(data).hexdigest()

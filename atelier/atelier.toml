@@ -13,15 +13,15 @@ sample_rate = 48000        # Hz, taxa de saída
 peak_ceiling_db = -1.0     # nenhum arquivo final passa daqui
 
 [audio.trim]
-threshold_db = -60.0       # abaixo disso conta como silêncio
-margin_ms = 20.0           # folga mantida em volta do som, para não cortar ataque e cauda
+threshold_db = -60.0
+margin_ms = 20.0
 
 [audio.sfx]
 target_lufs = -23.0
 apply_trim = true
 
 [audio.ambience]
-target_lufs = -30.0        # mais baixa que os sfx de propósito; igual para todos os momentos do dia
+target_lufs = -30.0
 apply_trim = false
 crossfade_ms = 2000.0
 
@@ -46,7 +46,7 @@ kind = "sfx"
 # vão referenciar. Para liberar outro momento, descomente o bloco e confira o nome do arquivo.
 [[audio.assets]]
 id = "ambience-earlymorning"
-source = "ambience/earlymorning/656124__itsthegoodstuff__nature-ambiance.wav"   # TROQUE pelo nome real do arquivo da pasta
+source = "ambience/earlymorning/656124__itsthegoodstuff__nature-ambiance.wav"
 kind = "ambience"
 
 # [[audio.assets]]

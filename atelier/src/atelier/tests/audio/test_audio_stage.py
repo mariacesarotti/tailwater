@@ -9,7 +9,7 @@ import soundfile as sf
 
 from atelier.audio.audio_stage import AudioStage, AudioStageError
 from atelier.config import Config
-from atelier.stage import BuildContext
+from atelier.stage import BuildContext, StageResult
 
 SR = 48_000
 
@@ -46,15 +46,13 @@ def sources(tmp_path: Path) -> Path:
     t = np.arange(SR) / SR
     tone = 0.2 * np.sin(2 * np.pi * 440 * t) * np.exp(-3 * t)
     silence = np.zeros(SR // 2)
-    pop = np.concatenate(
-        [silence, tone, silence]
-    )  # silêncio nas pontas: o trim tem o que cortar
+    pop = np.concatenate([silence, tone, silence])
     sf.write(src / "pop.wav", np.stack([pop, pop], axis=1), SR, subtype="FLOAT")
     sf.write(src / "river.wav", rng.normal(0, 0.05, (SR * 4, 2)), SR, subtype="FLOAT")
     return src
 
 
-def run(tmp_path: Path, **overrides: object):  # type: ignore[no-untyped-def]
+def run(tmp_path: Path, **overrides: object) -> StageResult:
     return AudioStage().build(BuildContext(config=make_config(tmp_path, **overrides)))
 
 
@@ -74,9 +72,7 @@ def test_meta_matches_target_and_ceiling(tmp_path: Path, sources: Path) -> None:
     assert river.meta["loudness_lufs"] == pytest.approx(-30.0, abs=0.2)
     assert river.meta["loop"] is True and pop.meta["loop"] is False
     assert isinstance(pop.meta["peak_db"], float) and pop.meta["peak_db"] <= -1.0
-    # o trim cortou o silêncio: bem menos que os 2 s da fonte
     assert isinstance(pop.meta["duration_s"], float) and pop.meta["duration_s"] < 1.3
-    # o crossfade deixa o rio 0,5 s mais curto que os 4 s da fonte
     assert river.meta["duration_s"] == pytest.approx(3.5, abs=0.001)
 
 
@@ -115,9 +111,9 @@ def test_source_change_redoes_the_work(tmp_path: Path, sources: Path) -> None:
 def test_deterministic_across_clean_builds(tmp_path: Path, sources: Path) -> None:
     a = run(tmp_path)
     cache = tmp_path / "out" / "audio" / ".cache.json"
-    cache.unlink()  # força refazer tudo, mesma máquina e mesma config
+    cache.unlink()
     b = run(tmp_path)
-    assert a.assets == b.assets  # mesmos bytes ⇒ mesmos nomes (hash de conteúdo)
+    assert a.assets == b.assets
 
 
 def test_conforms_6_channels_96khz(tmp_path: Path, sources: Path) -> None:
@@ -130,9 +126,7 @@ def test_conforms_6_channels_96khz(tmp_path: Path, sources: Path) -> None:
     )
     river = run(tmp_path).assets[1]
     assert river.meta["loudness_lufs"] == pytest.approx(-30.0, abs=0.3)
-    assert river.meta["duration_s"] == pytest.approx(
-        2.5, abs=0.01
-    )  # 3 s − 0,5 s de crossfade
+    assert river.meta["duration_s"] == pytest.approx(2.5, abs=0.01)
 
 
 def test_reports_every_failing_asset(tmp_path: Path, sources: Path) -> None:
@@ -156,9 +150,7 @@ def test_silent_source_passes_through_with_null_measures(
 
 
 def test_too_short_sfx_gives_a_clear_error(tmp_path: Path, sources: Path) -> None:
-    sf.write(
-        sources / "pop.wav", 0.1 * np.ones((SR // 10, 2)), SR, subtype="FLOAT"
-    )  # 0,1 s
+    sf.write(sources / "pop.wav", 0.1 * np.ones((SR // 10, 2)), SR, subtype="FLOAT")
     with pytest.raises(AudioStageError, match="pop.*loudness"):
         run(tmp_path)
 

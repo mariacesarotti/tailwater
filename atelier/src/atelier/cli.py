@@ -61,7 +61,7 @@ def build(
         )
     except StageSelectionError as exc:
         typer.echo(f"erro: {exc}", err=True)
-        raise typer.Exit(2) from exc  # 2 = uso incorreto da linha de comando
+        raise typer.Exit(2) from exc
 
     if result.manifest is None:
         for name, message in result.failures.items():

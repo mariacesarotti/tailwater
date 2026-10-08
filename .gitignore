@@ -32,3 +32,4 @@ __pycache__/
 # Experimentos locais do atelier
 atelier/scratch/
 sources/
+scripts/

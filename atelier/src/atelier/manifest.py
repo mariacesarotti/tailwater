@@ -20,8 +20,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 MANIFEST_SCHEMA_VERSION = 1
 
-# Valores permitidos em `meta`. None existe para medidas que não se aplicam
-# (ex.: loudness de um som mudo). NaN/Infinity são recusados: não são JSON válido.
+
 MetaValue = float | str | bool | None
 
 
@@ -34,12 +33,8 @@ class AssetEntry(_Model):
 
     id: str = Field(pattern=r"^[a-z0-9][a-z0-9_-]*$")
     kind: Literal["audio", "lut", "mesh", "path"]
-    stage: str = Field(
-        min_length=1
-    )  # qual estágio gerou (usado para mesclar com --only)
-    files: dict[str, str] = Field(
-        min_length=1
-    )  # formato → caminho relativo ao manifest
+    stage: str = Field(min_length=1)
+    files: dict[str, str] = Field(min_length=1)
     meta: dict[str, MetaValue] = Field(default_factory=dict)
 
     @field_validator("files")

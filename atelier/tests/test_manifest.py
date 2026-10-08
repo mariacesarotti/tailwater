@@ -34,7 +34,7 @@ def entry(id_: str = "river", **overrides: object) -> AssetEntry:
 
 
 def test_audio_stage_satisfies_the_stage_protocol() -> None:
-    stage: Stage = AudioStage()  # o mypy confere o contrato; aqui só garantimos o nome
+    stage: Stage = AudioStage()
     assert stage.name == "audio"
 
 
@@ -44,9 +44,7 @@ def test_json_is_valid_for_the_browser_and_has_schema_version() -> None:
         text, parse_constant=lambda c: pytest.fail(f"constante inválida: {c}")
     )
     assert data["schema_version"] == MANIFEST_SCHEMA_VERSION
-    assert (
-        data["assets"][0]["meta"]["peak_db"] is None
-    )  # None vira null, nunca -Infinity
+    assert data["assets"][0]["meta"]["peak_db"] is None
     assert text.endswith("\n")
 
 
@@ -96,7 +94,7 @@ def test_unknown_kind_and_unknown_field_are_rejected() -> None:
 
 def test_round_trip(tmp_path: Path) -> None:
     manifest = build_manifest([entry("a"), entry("b")], "0.1.0")
-    path = tmp_path / "out" / "manifest.json"  # a pasta ainda não existe
+    path = tmp_path / "out" / "manifest.json"
     write_manifest(manifest, path)
     assert Manifest.model_validate_json(path.read_text()) == manifest
 
@@ -106,6 +104,4 @@ def test_write_is_atomic_and_overwrites(tmp_path: Path) -> None:
     write_manifest(build_manifest([entry("a")], "0.1.0"), path)
     write_manifest(build_manifest([entry("b")], "0.2.0"), path)
     assert json.loads(path.read_text())["atelier_version"] == "0.2.0"
-    assert [p.name for p in tmp_path.iterdir()] == [
-        "manifest.json"
-    ]  # nenhum .tmp sobrando
+    assert [p.name for p in tmp_path.iterdir()] == ["manifest.json"]

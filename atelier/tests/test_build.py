@@ -71,7 +71,7 @@ def test_runs_every_stage_and_writes_the_manifest(tmp_path: Path) -> None:
     )
     assert result.ok and result.manifest is not None
     written = json.loads((tmp_path / "out" / MANIFEST_NAME).read_text())
-    assert [a["id"] for a in written["assets"]] == ["a", "b"]  # ordenado por id
+    assert [a["id"] for a in written["assets"]] == ["a", "b"]
     assert written["atelier_version"] == "9.9"
 
 
@@ -107,7 +107,7 @@ def test_failure_runs_the_rest_reports_all_and_writes_no_manifest(
     result = run_build(make_ctx(tmp_path), stages(boom, ok, other), None, "1")
     assert not result.ok and result.manifest is None
     assert result.failures == {"audio": "ffmpeg quebrou", "terrain": "outra falha"}
-    assert ok.calls == 1  # o estágio saudável rodou mesmo assim
+    assert ok.calls == 1
     assert not (tmp_path / "out" / MANIFEST_NAME).exists()
 
 

@@ -1,8 +1,8 @@
 const PLAYBACK_RATE_MIN = 0.9;
-const PLAYBACK_RATE_SPREAD = 0.2;   // 0.9 até 1.1
+const PLAYBACK_RATE_SPREAD = 0.2;
 
 const GAIN_FACTOR_MIN = 0.8;
-const GAIN_FACTOR_SPREAD = 0.4;     // 0.8 até 1.2
+const GAIN_FACTOR_SPREAD = 0.4;
 
 /**
  * Sorteia qual som tocar e com que variação de velocidade e volume.

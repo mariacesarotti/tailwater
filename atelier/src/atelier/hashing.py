@@ -10,7 +10,7 @@ import hashlib
 import json
 from pathlib import Path
 
-_CHUNK_SIZE = 1 << 20  # 1 MiB: arquivos grandes nunca são lidos inteiros na memória
+_CHUNK_SIZE = 1 << 20
 
 
 def hash_bytes(data: bytes) -> str:

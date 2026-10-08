@@ -44,8 +44,8 @@ def test_reaches_target(std: float, channels: int) -> None:
 
 def test_peak_never_exceeds_ceiling() -> None:
     x = make_noise(std=0.01)
-    x[SR] = 0.9  # um clique forte no meio de um áudio quieto
-    out = normalize_loudness(x, SR, -14.0, CEILING_DB)  # alvo alto: pede muito ganho
+    x[SR] = 0.9
+    out = normalize_loudness(x, SR, -14.0, CEILING_DB)
     assert peak_of(out) <= CEILING + 1e-9
 
 

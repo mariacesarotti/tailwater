@@ -44,7 +44,7 @@ kind = "ambience"
 def project(tmp_path: Path) -> Path:
     folder = tmp_path / "src" / "ambience" / "earlymorning"
     folder.mkdir(parents=True)
-    other = tmp_path / "src" / "ambience" / "night"  # existe, mas não está no toml
+    other = tmp_path / "src" / "ambience" / "night"
     other.mkdir(parents=True)
     rng = np.random.default_rng(0)
     sf.write(
@@ -55,7 +55,7 @@ def project(tmp_path: Path) -> Path:
     return tmp_path
 
 
-def invoke(project: Path, *args: str):  # type: ignore[no-untyped-def]
+def invoke(project: Path, *args: str):
     return runner.invoke(
         app, ["build", "--config", str(project / "atelier.toml"), *args]
     )
@@ -66,9 +66,7 @@ def test_build_only_audio_writes_only_the_listed_assets(project: Path) -> None:
     assert result.exit_code == 0, result.output
     manifest = json.loads((project / "out" / "manifest.json").read_text())
     assert [a["id"] for a in manifest["assets"]] == ["ambience-earlymorning"]
-    assert not list(
-        (project / "out" / "audio").glob("ambience-night*")
-    )  # a noite não subiu
+    assert not list((project / "out" / "audio").glob("ambience-night*"))
 
 
 def test_unknown_stage_exits_with_2_and_lists_valid_names(project: Path) -> None:

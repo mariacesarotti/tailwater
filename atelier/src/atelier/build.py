@@ -24,8 +24,8 @@ class StageSelectionError(ValueError):
 
 @dataclass(frozen=True)
 class BuildResult:
-    manifest: Manifest | None  # None quando algum estágio falhou: nada foi escrito
-    failures: dict[str, str] = field(default_factory=dict)  # nome do estágio → mensagem
+    manifest: Manifest | None
+    failures: dict[str, str] = field(default_factory=dict)
 
     @property
     def ok(self) -> bool:
@@ -66,8 +66,6 @@ def run_build(
     último, depois que todos os arquivos que ele cita já existem."""
     selected = select_stages(stages, only)
     if len(selected) < len(stages):
-        # v0: o manifest tem só os estágios selecionados. Mesclar com o anterior
-        # (para o --only não apagar o look) fica para a Etapa 4.
         logger.warning(
             "rodando só %s: o manifest terá apenas esses estágios",
             [s.name for s in selected],
@@ -79,7 +77,8 @@ def run_build(
         logger.info("estágio %s: começando", stage.name)
         try:
             result = stage.build(ctx)
-        except Exception as exc:  # noqa: BLE001  fronteira do runner: toda falha de estágio vira relatório
+        except Exception as exc:
+            logger.exception("estágio %s falhou", stage.name)
             failures[stage.name] = str(exc) or type(exc).__name__
             continue
         assets.extend(result.assets)
