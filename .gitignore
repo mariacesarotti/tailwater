@@ -30,4 +30,5 @@ __pycache__/
 .idea/
 
 # Experimentos locais do atelier
-atelier/scratch/sources/audio/
+atelier/scratch/
+sources/
