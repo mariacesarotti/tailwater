@@ -7,7 +7,6 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(import.meta.dirname, 'index.html'),
-        sculpt: resolve(import.meta.dirname, 'sculpt.html'),
       },
     },
   },
