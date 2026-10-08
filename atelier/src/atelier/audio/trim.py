@@ -1,7 +1,6 @@
 import numpy as np
 
 
-
 def trim_silence(
     samples: np.ndarray,
     sample_rate: int,
