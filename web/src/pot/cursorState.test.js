@@ -3,8 +3,6 @@ import { getCursorState, CURSOR_COLOR_ON_MESH, CURSOR_COLOR_DEFAULT, } from './c
 
 describe('getCursorState', () => {
 
-  // Tabela com as 4 combinações possíveis. Regra booleana pequena
-  // se testa melhor assim: completa e legível de uma olhada.
   it.each([
     { hasHit: true,  isHovering: true,  color: CURSOR_COLOR_ON_MESH, ringVisible: true  },
     { hasHit: true,  isHovering: false, color: CURSOR_COLOR_DEFAULT, ringVisible: false },

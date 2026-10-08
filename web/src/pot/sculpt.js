@@ -3,8 +3,7 @@ import { Inspector } from 'three/addons/inspector/Inspector.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { Sculptor } from 'three/addons/misc/Sculptor.js';
 import { createBlobGeometry } from './blob.js';
-import { createThrottle } from './throttle.js';
-import { pickSfxVariation } from './sfxVariation.js';
+import { initAudio, unlockAudio, playClay } from '../audio/audio.js';
 import { getCursorState } from './cursorState.js';
 
 let renderer, scene, camera, controls, sculptor, mesh;
@@ -24,48 +23,9 @@ const link = document.createElement( 'a' );
 link.style.display = 'none';
 document.body.appendChild( link );
 
-// Áudio
 
-const SFX_INTERVAL_MS = 150; // intervalo mínimo entre sons durante o arraste
-
-const audioCtx = new AudioContext();
-const clayBuffers = [];
-const sfxThrottle = createThrottle( SFX_INTERVAL_MS );
-
-async function loadClaySfx( urls ) {
-
-	for ( const url of urls ) {
-
-		const response = await fetch( url );
-		const data = await response.arrayBuffer();
-		clayBuffers.push( await audioCtx.decodeAudioData( data ) );
-
-	}
-
-}
-
-function playClay( volume = 0.4, force = false ) {
-
-	if ( clayBuffers.length === 0 ) return;
-	if ( sfxThrottle.tryFire( { force } ) === false ) return;
-
-	const { buffer, playbackRate, gainFactor } = pickSfxVariation( clayBuffers );
-
-	const source = audioCtx.createBufferSource();
-	source.buffer = buffer;
-	source.playbackRate.value = playbackRate;
-
-	const gain = audioCtx.createGain();
-	gain.gain.value = volume * gainFactor;
-
-	source.connect( gain ).connect( audioCtx.destination );
-	source.start();
-
-}
-
-loadClaySfx( [
-	import.meta.env.BASE_URL + 'sfx/clay1.m4a',
-] );
+initAudio().catch( ( error ) => console.warn( '[audio]', error.message ) );
+window.addEventListener( 'pointerdown', unlockAudio, { once: true } );
 
 export function onSculptFinished( callback ) {
 
@@ -92,40 +52,10 @@ function finishSculpt() {
 
 }
 
-// function exportGLTF() {
-
-// 	const exporter = new GLTFExporter();
-// 	const snapshot = mesh.clone();
-// 	snapshot.geometry = sculptor.getGeometry();
-
-// 	exporter.parse( snapshot, function ( buffer ) {
-
-// 		const blob = new Blob( [ buffer ], { type: 'application/octet-stream' } );
-// 		const objectURL = URL.createObjectURL( blob );
-// 		link.href = objectURL;
-// 		link.download = 'sculpt.glb';
-// 		link.click();
-
-// 		setTimeout( function () {
-
-// 			URL.revokeObjectURL( objectURL );
-// 			link.removeAttribute( 'href' );
-
-// 		}, 0 );
-
-// 	}, function ( error ) {
-
-// 		console.error( error );
-
-// 	}, { binary: true } );
-
-// }
-
 init();
 
 function init() {
 
-	// Renderer
 
 	const canvas = document.getElementById( 'sculpt' );
 	renderer = new THREE.WebGPURenderer( { canvas, antialias: true } );
@@ -134,17 +64,14 @@ function init() {
 	renderer.setAnimationLoop( animate );
 	renderer.inspector = new Inspector();
 
-	// Scene
 
 	scene = new THREE.Scene();
 	scene.background = new THREE.Color( 0x222222 );
 
-	// Camera
 
 	camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 100 );
 	camera.position.set( 0, 0, 4 );
 
-	// Lights
 
 	scene.add( new THREE.AmbientLight( 0x404040 ) );
 
@@ -156,7 +83,6 @@ function init() {
 	dirLight2.position.set( - 1, - 0.5, - 1 );
 	scene.add( dirLight2 );
 
-	// Mesh
 
 	const material = new THREE.MeshPhysicalMaterial( {
 		color: 0x8a5a44,
@@ -169,7 +95,6 @@ function init() {
 	mesh = new THREE.Mesh( createBlobGeometry(), material );
 	scene.add( mesh );
 
-	// Sculptor
 
 	sculptor = new Sculptor( mesh, camera );
 	sculptor.connect( renderer.domElement );
@@ -179,7 +104,7 @@ function init() {
 		releasedPointerId = null;
 		controls.enabled = false;
 
-		audioCtx.resume();
+		unlockAudio();
 		playClay( 0.5, true );
 
 	} );
@@ -198,7 +123,6 @@ function init() {
 
 	function handlePointerUp( event ) {
 
-		// Ignore releases from other pointers during a stroke.
 		if ( sculptor.isSculpting() ) return;
 
 		releasedPointerId = event.pointerId;
@@ -215,7 +139,6 @@ function init() {
 
 	function handleLostPointerCapture( event ) {
 
-		// Keep the pointerup cursor; capture-loss coordinates are unreliable.
 		if ( event.pointerId === releasedPointerId ) {
 
 			releasedPointerId = null;
@@ -231,12 +154,10 @@ function init() {
 	renderer.domElement.addEventListener( 'pointercancel', handlePointerCancel );
 	renderer.domElement.addEventListener( 'lostpointercapture', handleLostPointerCapture );
 
-	// Register OrbitControls after Sculptor so sculpt presses can disable orbiting.
 	controls = new OrbitControls( camera, renderer.domElement );
 	controls.enableDamping = true;
 	controls.dampingFactor = 0.1;
 
-	// Inspector
 
 	const tools = {
 		Clay: 'clay',
@@ -344,7 +265,6 @@ function init() {
 
 		_pointer.set( event.clientX, event.clientY );
 
-		// Hide the cursor while orbiting.
 		if ( event.buttons > 0 && sculptor.isSculpting() === false ) {
 
 			cursorGroup.visible = false;
@@ -384,7 +304,6 @@ function init() {
 
 		} else {
 
-			// Face the camera when the ray misses the mesh.
 			const rect = renderer.domElement.getBoundingClientRect();
 			const x = ( ( _pointer.x - rect.left ) / rect.width ) * 2 - 1;
 			const offsetX = ( ( _pointer.x + sculptor.getSize() - rect.left ) / rect.width ) * 2 - 1;
@@ -407,7 +326,6 @@ function init() {
 
 	}
 
-	// Resize
 
 	window.addEventListener( 'resize', onWindowResize );
 
