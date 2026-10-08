@@ -145,15 +145,15 @@ def test_reports_every_failing_asset(tmp_path: Path, sources: Path) -> None:
     assert "pop" in message and "fonte não encontrada" in message
     assert "river" in message
 
+
 def test_silent_source_passes_through_with_null_measures(
     tmp_path: Path, sources: Path
 ) -> None:
     sf.write(sources / "river.wav", np.zeros((SR * 4, 2)), SR, subtype="FLOAT")
     river = run(tmp_path).assets[1]
     assert river.meta["loudness_lufs"] is None and river.meta["peak_db"] is None
-    json.dumps(
-        river.model_dump(mode="json"), allow_nan=False
-    ) 
+    json.dumps(river.model_dump(mode="json"), allow_nan=False)
+
 
 def test_too_short_sfx_gives_a_clear_error(tmp_path: Path, sources: Path) -> None:
     sf.write(

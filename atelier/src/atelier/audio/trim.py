@@ -20,7 +20,7 @@ def trim_silence(
     amplitude = np.abs(samples).max(axis=channel_axes, initial=0.0)
     loud = np.flatnonzero(amplitude >= threshold)
     if loud.size == 0:
-        return samples[:0] 
+        return samples[:0]
     start = max(loud[0] - margin, 0)
     end = min(loud[-1] + 1 + margin, samples.shape[0])
     return samples[start:end]
