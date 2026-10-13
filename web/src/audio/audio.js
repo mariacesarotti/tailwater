@@ -60,21 +60,20 @@ export async function initAudio() {
 
   const [ambience, ...clays] = await Promise.allSettled(wanted);
 
-  if (ambience.status === 'fulfilled') {
-    ambienceBuffer = ambience.value;
-    startAmbienceIfReady();
-  }
-
+  // sons de barro são opcionais: sem eles o ritual segue em silêncio
   for (const result of clays) {
     if (result.status === 'fulfilled') clayBuffers.push(result.value);
+    else console.warn('[audio]', result.reason.message);
   }
 
-  for (const result of [ambience, ...clays]) {
-    if (result.status === 'rejected') console.warn('[audio]', result.reason.message);
-  }
+  // sem ambiência não tem ritual
+  if (ambience.status === 'rejected') throw ambience.reason;
+
+  ambienceBuffer = ambience.value;
+  startAmbienceIfReady();
 }
 
-/** Chame dentro de um gesto (pointerdown). Pode ser chamada várias vezes. */
+/** Chame dentro de um gesto do usuário (clique em "entrar"). Pode ser chamada várias vezes. */
 export function unlockAudio() {
   unlocked = true;
   audioCtx.resume().then(startAmbienceIfReady);
